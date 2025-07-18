@@ -24,6 +24,18 @@ def competitors(target: str) -> Dict:
     data = response.json()
     articles = [article["title"] for article in data.get("articles", [])]
     return {"competitors_news": articles}
+@app.post("/uspto_patents")
+def uspto_patents(search: Dict) -> Dict:
+    search_term = search["search_term"]
+    url = "https://api.patentsview.org/patents/query"
+    query = {
+        "q": {"_text_any": {"patent_title": search_term}},
+        "f": ["patent_number", "patent_title", "patent_date"],
+        "o": {"per_page": 5}
+    }
+    response = requests.post(url, json=query)
+    return {"patents": response.json().get("patents", [])}
+
 
 @app.post("/search_patents")
 def search_patents(payload: PatentQuery) -> Dict:
