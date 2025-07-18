@@ -27,30 +27,31 @@ def competitors(target: str) -> Dict:
 @app.post("/uspto_patents")
 def uspto_patents(search: Dict) -> Dict:
     search_term = search["search_term"]
-    url = "https://api.patentsview.org/api/patents/query"  # ✅ Richtig
 
-    query = {
-        "q": {
-            "_or": [
-                {"_text_any": {"patent_title": search_term}},
-                {"_text_any": {"patent_abstract": search_term}},
-                {"_text_any": {"patent_claims": search_term}},
-                {"_text_any": {"patent_description": search_term}}
-            ]
-        },
-        "f": ["patent_number", "patent_title", "patent_date"],
-        "o": {"per_page": 5}
+    url = "https://api.patentsview.org/graphql"
+    graphql_query = {
+        "query": f"""
+        query {{
+            patents(input: {{perPage: 5, keyword: "{search_term}"}}) {{
+                patentNumber
+                patentTitle
+                patentDate
+            }}
+        }}
+        """
     }
 
-    response = requests.post(url, json=query)
+    response = requests.post(url, json=graphql_query)
+
     if response.status_code != 200:
         return {
-            "error": "PatentsView API Error",
+            "error": "GraphQL PatentsView API Error",
             "status_code": response.status_code,
             "details": response.text
         }
 
-    return {"patents": response.json().get("patents", [])}
+    return response.json()
+
 
 # ---- LENS PATENTS ----
 @app.post("/search_patents")
