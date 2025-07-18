@@ -27,7 +27,7 @@ def competitors(target: str) -> Dict:
 @app.post("/uspto_patents")
 def uspto_patents(search: Dict) -> Dict:
     search_term = search["search_term"]
-    url = "https://api.patentsview.org/patents/query"
+    url = "https://search.patentsview.org/api/v1/patents"  # ✅ NEUER ENDPOINT
     
     query = {
         "q": {
@@ -43,14 +43,10 @@ def uspto_patents(search: Dict) -> Dict:
     }
     
     response = requests.post(url, json=query)
-    
-    # Fallback bei leerem Response sicherstellen
     if response.status_code != 200:
         return {"error": "PatentsView API Error", "status_code": response.status_code}
     
-    patents = response.json().get("patents", [])
-    
-    return {"patents": patents}
+    return {"patents": response.json().get("patents", [])}
 
 
 
