@@ -18,7 +18,7 @@ def competitors(target: str) -> Dict:
     articles = [article["title"] for article in data.get("articles", [])]
     return {"competitors_news": articles}
 
-@app.get("/search_patents")
+@app.post("/search_patents")
 def search_patents(query: str) -> Dict:
     headers = {"Authorization": f"Bearer {LENS_API_KEY}"}
     body = {
