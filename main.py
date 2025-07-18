@@ -24,20 +24,31 @@ def competitors(target: str) -> Dict:
     return {"competitors_news": [a["title"] for a in response.json().get("articles", [])]}
 
 # ---- USPTO PATENTS ----
-@app.post("/uspto_patents")
-def uspto_patents(search: Dict) -> Dict:
-    search_term = search["search_term"]
-
+@app.get("/recent_inventors")
+def recent_inventors() -> Dict:
     url = "https://api.patentsview.org/graphql"
+
     graphql_query = {
-        "query": f"""
-        query {{
-            patents(input: {{perPage: 5, keyword: "{search_term}"}}) {{
-                patentNumber
-                patentTitle
-                patentDate
-            }}
-        }}
+        "query": """
+        query {
+            inventors(input: {
+                perPage: 5,
+                filters: {
+                    patents: {
+                        patentDate: { gte: "2023-01-01" }
+                    }
+                }
+            }) {
+                inventorId
+                nameFirst
+                nameLast
+                patents {
+                    patentNumber
+                    patentTitle
+                    patentDate
+                }
+            }
+        }
         """
     }
 
