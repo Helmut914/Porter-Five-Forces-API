@@ -28,13 +28,23 @@ def competitors(target: str) -> Dict:
 def uspto_patents(search: Dict) -> Dict:
     search_term = search["search_term"]
     url = "https://api.patentsview.org/patents/query"
+    
+    # Breitere Suchanfrage über mehrere Felder
     query = {
-        "q": {"_text_any": {"patent_title": search_term}},
+        "q": {
+            "_or": [
+                {"_text_any": {"patent_title": search_term}},
+                {"_text_any": {"patent_abstract": search_term}},
+                {"_text_any": {"patent_claims": search_term}}
+            ]
+        },
         "f": ["patent_number", "patent_title", "patent_date"],
         "o": {"per_page": 5}
     }
+
     response = requests.post(url, json=query)
     return {"patents": response.json().get("patents", [])}
+
 
 
 @app.post("/search_patents")
